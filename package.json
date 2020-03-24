@@ -1,7 +1,9 @@
 {
 	"name": "select-indentation",
-	"displayName": "select-indentation",
-	"description": "Select text around cursor incrementally based on it's indentation:",
+  "displayName": "select-indentation",
+  "publisher": "o175",
+  "description": "Select text around cursor incrementally based on it's indentation:",
+  "repository": "https://github.com/o175/indent-selection-code",
 	"version": "0.0.1",
 	"engines": {
 		"vscode": "^1.43.0"
