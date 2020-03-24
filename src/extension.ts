@@ -55,7 +55,7 @@ function getNewSelection(doc: vscode.TextDocument, current: vscode.Selection): v
 	const line = doc.lineAt(current.active);
 
 	const direction = selectionDirecion(current);
-	if(current.isSingleLine){
+	if(current.isSingleLine && !current.isEqual(line.range)){
 		return rangeToSelection(line.range, direction);
 	}
 	const minDepth = getMinimalTextDepth(doc, current);
