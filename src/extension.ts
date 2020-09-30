@@ -8,32 +8,32 @@ enum Direction {
 	down,
 	up
 }
-function getLineIndentation(doc: vscode.TextDocument, lineNumber: number){
-	const line=doc.lineAt(lineNumber);
+function getLineIndentation(doc: vscode.TextDocument, lineNumber: number) {
+	const line = doc.lineAt(lineNumber);
 	return line.firstNonWhitespaceCharacterIndex;
 }
-function expandableAtCurrentLevel(doc: vscode.TextDocument, range: vscode.Range){
+function expandableAtCurrentLevel(doc: vscode.TextDocument, range: vscode.Range) {
 	const minDepth = getMinimalTextDepth(doc, range);
-	return getLineIndentation(doc, doc.lineAt(range.start).lineNumber-1) >= minDepth || 
-	getLineIndentation(doc, doc.lineAt(range.end).lineNumber+1) >= minDepth; 
+	return getLineIndentation(doc, doc.lineAt(range.start).lineNumber - 1) >= minDepth ||
+		getLineIndentation(doc, doc.lineAt(range.end).lineNumber + 1) >= minDepth;
 }
 function rangeToSelection(range: vscode.Range, direction: Direction) {
 	return direction === Direction.down ?
-	new vscode.Selection(range.start, range.end):
-	new vscode.Selection(range.end, range.start);
+		new vscode.Selection(range.start, range.end) :
+		new vscode.Selection(range.end, range.start);
 }
 function selectionDirecion(selection: vscode.Selection) {
-	return selection.isReversed? Direction.up: Direction.down;
+	return selection.isReversed ? Direction.up : Direction.down;
 }
 
-function getMinimalTextDepth(doc: vscode.TextDocument, range: vscode.Range){
+function getMinimalTextDepth(doc: vscode.TextDocument, range: vscode.Range) {
 	const startLine = doc.lineAt(range.start);
 	const endLine = doc.lineAt(range.end);
 	let lineNumber = startLine.lineNumber;
 	let min = +Infinity;
-	while(lineNumber <= endLine.lineNumber){
+	while (lineNumber <= endLine.lineNumber) {
 		const currentIndentation = getLineIndentation(doc, lineNumber);
-		if(currentIndentation < min){
+		if (currentIndentation < min) {
 			min = currentIndentation;
 		}
 		lineNumber++;
@@ -44,36 +44,36 @@ function getExpansionOfSameLevel(doc: vscode.TextDocument, postiton: vscode.Posi
 	const line = doc.lineAt(postiton.line);
 	const currentLevel = getLineIndentation(doc, line.lineNumber);
 	let lineNumber = line.lineNumber;
-	while(
-		getLineIndentation(doc, lineNumber + (direction === Direction.down? 1 : -1)) >= currentLevel  
-	){
-		lineNumber += (direction === Direction.down? 1 : -1);
+	while (
+		getLineIndentation(doc, lineNumber + (direction === Direction.down ? 1 : -1)) >= currentLevel
+	) {
+		lineNumber += (direction === Direction.down ? 1 : -1);
 	}
 	return line.range.union(doc.lineAt(lineNumber).range);
 }
-function getNewSelection(doc: vscode.TextDocument, current: vscode.Selection): vscode.Selection{
+function getNewSelection(doc: vscode.TextDocument, current: vscode.Selection): vscode.Selection {
 	const line = doc.lineAt(current.active);
 
 	const direction = selectionDirecion(current);
-	if(current.isSingleLine && !current.isEqual(line.range)){
+	if (current.isSingleLine && !current.isEqual(line.range)) {
 		return rangeToSelection(line.range, direction);
 	}
 	const minDepth = getMinimalTextDepth(doc, current);
-	if (expandableAtCurrentLevel(doc, current)){
-		return rangeToSelection( current
+	if (expandableAtCurrentLevel(doc, current)) {
+		return rangeToSelection(current
 			.union(getExpansionOfSameLevel(doc, current.start, Direction.up)
-			.union(getExpansionOfSameLevel(doc, current.end, Direction.down)
-			)), direction);
+				.union(getExpansionOfSameLevel(doc, current.end, Direction.down)
+				)), direction);
 
 	} else {
-		const prevLineDepth =  getLineIndentation(doc, current.start.line -1);
-		const nextLineDepth =  getLineIndentation(doc, current.end.line +1) ;
+		const prevLineDepth = getLineIndentation(doc, current.start.line - 1);
+		const nextLineDepth = getLineIndentation(doc, current.end.line + 1);
 		let newRange: vscode.Range;
-		if(prevLineDepth === nextLineDepth ) {
-			newRange = doc.lineAt(current.start.line - 1).range.union(doc.lineAt(current.end.line + 1).range)
-		} else if(
+		if (prevLineDepth === nextLineDepth) {
+			newRange = doc.lineAt(current.start.line - 1).range.union(doc.lineAt(current.end.line + 1).range);
+		} else if (
 			prevLineDepth > nextLineDepth
-		){
+		) {
 			newRange = doc.lineAt(current.start.line - 1).range.union(current);
 		} else {
 			newRange = doc.lineAt(current.end.line + 1).range.union(current);
@@ -95,12 +95,16 @@ export function activate(context: vscode.ExtensionContext) {
 	let disposable = vscode.commands.registerTextEditorCommand('select-indentation.expand-selection', (editor) => {
 		const doc = editor.document;
 		if (!doc) { return; };
-
-		editor.selections = editor.selections.map(selection=>getNewSelection(doc, selection));
+		try {
+			editor.selections = editor.selections.map(selection => getNewSelection(doc, selection));
+		}
+		catch {
+			vscode.commands.executeCommand("editor.action.selectAll");
+		}
 	});
 
 	context.subscriptions.push(disposable);
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() { }

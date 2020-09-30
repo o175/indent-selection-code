@@ -1,10 +1,10 @@
 {
 	"name": "select-indentation",
-  "displayName": "select-indentation",
-  "publisher": "o175",
-  "description": "Select text around cursor incrementally based on it's indentation:",
-  "repository": "https://github.com/o175/indent-selection-code",
-	"version": "0.0.1",
+	"displayName": "select-indentation",
+	"publisher": "o175",
+	"description": "Select text around cursor incrementally based on it's indentation:",
+	"repository": "https://github.com/o175/indent-selection-code",
+	"version": "0.0.2",
 	"engines": {
 		"vscode": "^1.43.0"
 	},
@@ -27,7 +27,8 @@
 				"command": "select-indentation.expand-selection",
 				"key": "ctrl+shift+h",
 				"when": "editorTextFocus"
-			}]
+			}
+		]
 	},
 	"scripts": {
 		"vscode:prepublish": "yarn run compile",
@@ -42,9 +43,9 @@
 		"@types/mocha": "^7.0.1",
 		"@types/node": "^12.11.7",
 		"@types/vscode": "^1.43.0",
-		"eslint": "^6.8.0",
-		"@typescript-eslint/parser": "^2.18.0",
 		"@typescript-eslint/eslint-plugin": "^2.18.0",
+		"@typescript-eslint/parser": "^2.18.0",
+		"eslint": "^6.8.0",
 		"glob": "^7.1.6",
 		"mocha": "^7.0.1",
 		"typescript": "^3.7.5",
